@@ -1,26 +1,69 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useState} from 'react';
+import {connect} from "react-redux";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import getTracks from './actions';
+
+function App(props) {
+    let [inputData, setInputData ]  = useState(0);
+    let [searchData, setSearchtData ]  = useState(0);
+    const handleChangeInput = (event) => {
+        setInputData ({value: event.target.value});
+    };
+    const handleChangeSearch = (event) => {
+
+        setSearchtData  ({value: event.target.value});
+
+    };
+    const handleAddTrack = () => {
+        console.log((props.testStore));
+        props.onAddTrack(inputData.value);
+
+    };
+    const handleFindTrack = () => {
+        console.log((props.testStore));
+        props.onFindTrack(searchData.value);
+    };
+
+      return <div className="App">
+        <div>
+            <input type={'text'} onChange={handleChangeInput}/>
+            <button onClick={handleAddTrack}>push</button>
+        </div>
+        <div>
+            <input type={'text'} onChange={handleChangeSearch}/>
+            <button onClick={handleFindTrack}>find</button>
+        </div>
+          <div>
+              <button onClick={props.onGetTracks}>Get tracks</button>
+          </div>
+        <div>
+            {
+                props.tracks.map((item, index) => (<li key={index}>{item.name}</li>))
+            }
+        </div>
+
+    </div>;
 }
 
-export default App;
+export default connect(
+    state=>({
+        testStore: state,
+        tracks: state.tracks.filter(track => track.name.includes(state.filterTracks))
+
+    }),
+    dispatch =>({
+        onAddTrack: name => {
+            const playload = {
+                id: Date.now().toString(),
+                name,
+            };
+            dispatch({type: 'ADD_TRACK', playload});
+        },
+        onFindTrack: name => {
+            dispatch({type: 'FIND_TRACK',payload: name})
+        },
+        onGetTracks: () => {
+           dispatch(getTracks());
+        }
+    })
+)(App);
